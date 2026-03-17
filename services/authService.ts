@@ -9,7 +9,7 @@ export const authService = (apiFetch: ApiFetch) => ({
             body: { email, password },
         }),
 
-    getProfile: () => apiFetch<User>('/auth/profile'),
+    //getProfile: () => apiFetch<User>('/auth/profile'),
 
-    logout: () => apiFetch('/auth/logout', { method: 'POST' }),
+    //logout: () => apiFetch('/auth/logout', { method: 'POST' }),
 });

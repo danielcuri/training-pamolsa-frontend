@@ -27,67 +27,93 @@
 
                     <div class="w-full max-w-[440px] lg:mt-16">
                         <div class="mb-10">
-                            <h1 class="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign in
+                            <h1 class="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">
+                                Sign in
                             </h1>
-                            <p class="text-base font-bold leading-normal text-white-dark">Enter your email and password
-                                to login</p>
+                            <p class="text-base font-bold leading-normal text-white-dark">
+                                Enter your email and password to login
+                            </p>
                         </div>
+
                         <form class="space-y-5 dark:text-white" @submit.prevent="handleLogin">
                             <div>
                                 <label for="Email">Email</label>
                                 <div class="relative text-white-dark">
-                                    <input id="Email" type="email" placeholder="Enter Email"
-                                        class="form-input ps-10 placeholder:text-white-dark" />
+                                    <input
+                                        id="Email"
+                                        v-model="email"
+                                        type="email"
+                                        placeholder="Enter Email"
+                                        class="form-input ps-10 placeholder:text-white-dark"
+                                        :disabled="loading"
+                                    />
                                     <span class="absolute start-4 top-1/2 -translate-y-1/2">
                                         <icon-mail :fill="true" />
                                     </span>
                                 </div>
                             </div>
+
                             <div>
                                 <label for="Password">Password</label>
                                 <div class="relative text-white-dark">
-                                    <input id="Password" type="password" placeholder="Enter Password"
-                                        class="form-input ps-10 placeholder:text-white-dark" />
+                                    <input
+                                        id="Password"
+                                        v-model="password"
+                                        type="password"
+                                        placeholder="Enter Password"
+                                        class="form-input ps-10 placeholder:text-white-dark"
+                                        :disabled="loading"
+                                    />
                                     <span class="absolute start-4 top-1/2 -translate-y-1/2">
                                         <icon-lock-dots :fill="true" />
                                     </span>
                                 </div>
                             </div>
-                            <button type="submit"
-                                class="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]">
-                                Sign in
+
+                            <!-- mensaje de error -->
+                            <p v-if="error" class="text-sm text-red-500">{{ error }}</p>
+
+                            <button
+                                type="submit"
+                                :disabled="loading"
+                                class="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)] disabled:opacity-60"
+                            >
+                                <span v-if="loading">Cargando...</span>
+                                <span v-else>Sign ini</span>
                             </button>
                         </form>
                     </div>
-                    <p class="absolute bottom-6 w-full text-center dark:text-white">© {{ year }}.VRISTO All Rights
-                        Reserved.</p>
+
+                    <p class="absolute bottom-6 w-full text-center dark:text-white">
+                        © {{ year }}. VRISTO All Rights Reserved.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
 <script lang="ts" setup>
-import { computed } from 'vue';
 import appSetting from '@/app-setting';
-import { useAppStore } from '@/stores/index';
-import { useRouter } from 'vue-router';
-useHead({ title: 'Login Cover' });
-const router = useRouter();
+
+useHead({ title: 'Login' });
+
 definePageMeta({
     layout: 'auth-layout',
-});
+})
+
 const year = new Date().getFullYear()
-const store = useAppStore();
-const { setLocale } = useI18n();
+const { setLocale } = useI18n()
+const { login, loading, error } = useAuth()
 
-// multi language
-const changeLanguage = (item: any) => {
-    appSetting.toggleLanguage(item, setLocale);
-};
+const email    = ref('')
+const password = ref('')
 
-const handleLogin = () => {
-    // aquí luego validas login real
-    console.log('login')
-    //router.push('dashboard')
+const handleLogin = async () => {
+    console.log(113)
+    if (!email.value || !password.value) return
+    await login(email.value, password.value)
 }
+
+
 </script>
