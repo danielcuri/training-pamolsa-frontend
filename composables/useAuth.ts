@@ -16,7 +16,7 @@ export const useAuth = () => {
             const res = await svc.login(email, password);
             if (res.status && res.data) {
                 authStore.setSession(res.data.token, res.data.user);
-                await router.push('/dashboard');
+                await navigateTo('/dashboard');
             }
         } catch (e: any) {
             error.value = e.data?.message ?? 'Error al iniciar sesión';
@@ -27,10 +27,10 @@ export const useAuth = () => {
 
     const logout = async () => {
         try {
-            await svc.logout();
+            //await svc.logout();
         } catch {}
         authStore.logout();
-        await router.push('/auth');
+        await navigateTo('/auth');
     };
 
     return { login, logout, loading, error };

@@ -13,7 +13,6 @@ interface ApiFetchOptions {
 export const useApiFetch = () => {
     const config = useRuntimeConfig();
     const authStore = useAuthStore();
-    const router = useRouter();
 
     const apiFetch = async <T>(endpoint: string, options: ApiFetchOptions = {}): Promise<ApiResponse<T>> => {
         const headers: Record<string, string> = {
@@ -35,7 +34,7 @@ export const useApiFetch = () => {
         } catch (error: any) {
             if (error?.response?.status === 401) {
                 authStore.logout();
-                await router.push('/auth');
+                await navigateTo('/auth');
             }
             throw error;
         }

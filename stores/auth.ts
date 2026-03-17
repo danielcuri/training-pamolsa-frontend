@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
         role.value = newUser.role ?? '';
 
         if (import.meta.client) {
+            console.log(25);
             localStorage.setItem('auth_token', newToken);
             localStorage.setItem('auth_user', JSON.stringify(newUser));
             localStorage.setItem('auth_role', newUser.role ?? '');
