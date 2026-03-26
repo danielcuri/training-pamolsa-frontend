@@ -4,6 +4,7 @@ export interface ApiResponse<T = unknown> {
     message: string;
     status: boolean;
     data?: T;
+    meta?: unknown;
 }
 
 export interface User {
@@ -26,3 +27,5 @@ export interface LoginResponse {
     user: User;
     token: string;
 }
+
+// Estados que envía/recibe el backend para el módulo de proyectos.
