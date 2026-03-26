@@ -23,11 +23,17 @@
         "vue-tsc": "^2.0.29"
     },
     "dependencies": {
-        "@nuxt/types": "^2.18.1",
+        "@bhplugin/vue3-datatable": "^2.0.2",
+        "@headlessui/vue": "^1.7.23",
         "@pinia/nuxt": "^0.5.4",
+        "@vee-validate/zod": "^4.15.1",
         "pinia": "^2.0.22",
+        "sweetalert2": "^11.26.24",
+        "tippy.vue": "^3.2.1",
+        "vee-validate": "^4.15.1",
         "vue-height-collapsible": "^0.1.1",
         "vue3-perfect-scrollbar": "^2.0.0",
-        "vue3-popper": "^1.5.0"
+        "vue3-popper": "^1.5.0",
+        "zod": "^3.25.76"
     }
 }
