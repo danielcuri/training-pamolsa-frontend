@@ -1,7 +1,7 @@
 <template>
     <form class="space-y-4" @submit.prevent="emit('submit')">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div class="md:col-span-2">
                 <label for="training-template-project">Proyecto</label>
                 <select id="training-template-project" v-model="selectedProjectIdProxy" class="form-select"
                     :class="{ 'border-red-500': errors?.projectId }" :disabled="saving || loadingAreas">
@@ -15,7 +15,7 @@
                 </p>
             </div>
 
-            <div>
+            <div class="md:col-span-2">
                 <label for="training-template-area">Área</label>
                 <select id="training-template-area" v-model="areaIdProxy" v-bind="areaIdAttrs" class="form-select"
                     :class="{ 'border-red-500': errors?.areaId }"
@@ -36,7 +36,7 @@
                 </p>
             </div>
 
-            <div class="md:col-span-2">
+            <div class="md:col-span-4">
                 <label for="training-template-name">Nombre</label>
                 <input id="training-template-name" v-model="nameProxy" v-bind="nameAttrs" type="text" class="form-input"
                     :class="{ 'border-red-500': errors?.name }" :disabled="saving" placeholder="Nombre del template" />
@@ -45,7 +45,7 @@
                 </p>
             </div>
 
-            <div>
+            <div class="md:col-span-1">
                 <label for="training-template-version">Versión</label>
                 <input id="training-template-version" v-model="versionProxy" v-bind="versionAttrs" type="number"
                     min="1" step="1" class="form-input" :class="{ 'border-red-500': errors?.version }" :disabled="saving"
@@ -55,7 +55,7 @@
                 </p>
             </div>
 
-            <div>
+            <div class="md:col-span-1">
                 <label for="training-template-minimum-score">Nota mínima</label>
                 <input id="training-template-minimum-score" v-model="minimumPassingScoreProxy"
                     v-bind="minimumPassingScoreAttrs" type="number" min="0" step="0.01" class="form-input"
@@ -65,8 +65,8 @@
                 </p>
             </div>
 
-            <div>
-                <label for="training-template-period-duration">Duración del período (días)</label>
+            <div class="md:col-span-1">
+                <label for="training-template-period-duration">Duración (días)</label>
                 <input id="training-template-period-duration" v-model="periodDurationDaysProxy"
                     v-bind="periodDurationDaysAttrs" type="number" min="1" step="1" class="form-input"
                     :class="{ 'border-red-500': errors?.periodDurationDays }" :disabled="saving" placeholder="1" />
@@ -75,8 +75,8 @@
                 </p>
             </div>
 
-            <div>
-                <label for="training-template-total-periods">Total de períodos</label>
+            <div class="md:col-span-1">
+                <label for="training-template-total-periods">Total períodos</label>
                 <input id="training-template-total-periods" v-model="totalPeriodsProxy" v-bind="totalPeriodsAttrs"
                     type="number" min="1" step="1" class="form-input" :class="{ 'border-red-500': errors?.totalPeriods }"
                     :disabled="saving" placeholder="1" />
@@ -85,7 +85,7 @@
                 </p>
             </div>
 
-            <div class="md:col-span-2">
+            <div class="md:col-span-3">
                 <label for="training-template-pdf">Plantilla PDF</label>
                 <input id="training-template-pdf" v-model="certificateTemplatePdfProxy" v-bind="certificateTemplatePdfAttrs"
                     type="text" class="form-input" :class="{ 'border-red-500': errors?.certificateTemplatePdf }"
@@ -98,7 +98,7 @@
                 </p>
             </div>
 
-            <div>
+            <div class="md:col-span-1">
                 <label for="training-template-status">Estado</label>
                 <select id="training-template-status" v-model="statusProxy" v-bind="statusAttrs" class="form-select"
                     :class="{ 'border-red-500': errors?.status }" :disabled="saving">
