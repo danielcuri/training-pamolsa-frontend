@@ -112,8 +112,8 @@ export const useProjects = () => {
         isModalOpen.value = true;
     };
 
-    const closeModal = () => {
-        if (saving.value) return;
+    const closeModal = (force = false) => {
+        if (saving.value && !force) return;
         isModalOpen.value = false;
         editingId.value = null;
         formError.value = null;
@@ -207,7 +207,7 @@ export const useProjects = () => {
                 update: 'Proyecto actualizado correctamente.',
             },
             onSuccess: async () => {
-                closeModal();
+                closeModal(true);
                 await loadProjects();
             },
         });
