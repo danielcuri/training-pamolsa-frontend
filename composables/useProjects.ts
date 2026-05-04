@@ -152,15 +152,26 @@ export const useProjects = () => {
         error.value = null;
 
         try {
-            const res = await svc.list({ page: 1, limit: 100 });
+            const aggregatedProjects: Project[] = [];
+            let currentPage = 1;
+            let totalPagesToFetch = 1;
 
-            if (res.status && res.data) {
-                // Usa tu extractFromResponse existente
-                console.log({ res });
+            while (currentPage <= totalPagesToFetch) {
+                const res = await svc.list({ page: currentPage, limit: 100 });
+                if (!res.status || !res.data) break;
+
                 const extracted = extractFromResponse(res);
+                aggregatedProjects.push(...(extracted.items as Project[]));
 
-                projects.value = extracted.items as Project[];
+                const page = typeof extracted.page === 'number' ? extracted.page : currentPage;
+                const limit = typeof extracted.limit === 'number' ? extracted.limit : 100;
+                const total = typeof extracted.total === 'number' ? extracted.total : aggregatedProjects.length;
+
+                totalPagesToFetch = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+                currentPage = page + 1;
             }
+
+            projects.value = aggregatedProjects;
         } catch (e: any) {
             error.value = e?.data?.message ?? 'Error al cargar proyectos';
         } finally {

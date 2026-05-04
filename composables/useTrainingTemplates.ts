@@ -3,41 +3,29 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 
 import { areaService } from '~/services/areaService';
-import { userService } from '~/services/userService';
-import { userSchema } from '~/schemas/user.schema';
+import { trainingTemplateService } from '~/services/trainingTemplateService';
+import { trainingTemplateSchema } from '~/schemas/trainingTemplate.schema';
 import { useAlert } from './useAlert';
 import { useFormSubmit } from './useFormSubmit';
 
 import type { AreaMinimal } from '~/types/operation';
-import type { UserItem, UserListParams, UserRole, UserStatus, UserUpsertPayload } from '~/types/user';
+import type {
+    TrainingTemplateItem,
+    TrainingTemplateListParams,
+    TrainingTemplateStatus,
+    TrainingTemplateUpsertPayload,
+} from '~/types/trainingTemplate';
 
-const toDateInput = (value?: string | null) => {
-    if (!value) return '';
-    return value.slice(0, 10);
-};
-
-const toIsoDate = (value: string) => {
-    return new Date(`${value}T00:00:00`).toISOString();
-};
-
-const normalizeRole = (value: unknown): UserRole | undefined => {
-    if (value === 'ADMIN' || value === 'COLLABORATOR' || value === 'SUPERVISOR' || value === 'SUPERADMIN') {
-        return value;
-    }
-
-    return undefined;
-};
-
-export const useUsers = () => {
+export const useTrainingTemplates = () => {
     const { apiFetch } = useApiFetch();
-    const svc = userService(apiFetch);
+    const svc = trainingTemplateService(apiFetch);
     const areaSvc = areaService(apiFetch);
     const { submit } = useFormSubmit();
     const { successAlert, errorAlert, confirmAlert } = useAlert();
 
     const loading = ref(false);
     const error = ref<string | null>(null);
-    const users = ref<UserItem[]>([]);
+    const templates = ref<TrainingTemplateItem[]>([]);
 
     const filters = reactive({
         projectId: '' as string | undefined,
@@ -66,66 +54,62 @@ export const useUsers = () => {
     const availableAreas = ref<AreaMinimal[]>([]);
     const loadingAreas = ref(false);
 
-    const {
-        handleSubmit,
-        resetForm,
-        setValues,
-        setFieldError,
-        errors,
-        defineField,
-    } = useForm({
-        validationSchema: toTypedSchema(userSchema),
+    const filterAreas = ref<AreaMinimal[]>([]);
+    const loadingFilterAreas = ref(false);
+
+    const { handleSubmit, resetForm, setValues, errors, defineField } = useForm({
+        validationSchema: toTypedSchema(trainingTemplateSchema),
         initialValues: {
             name: '',
-            email: '',
-            dni: '',
-            password: '',
-            educationLevel: '',
-            hireDate: '',
-            role: 'COLLABORATOR' as UserRole,
-            status: 'ACTIVE' as UserStatus,
+            version: '1',
+            periodDurationDays: '1',
+            totalPeriods: '1',
+            minimumPassingScore: '0',
+            certificateTemplatePdf: '',
+            status: 'ACTIVE' as TrainingTemplateStatus,
             projectId: '',
             areaId: '',
         },
     });
 
     const [name, nameAttrs] = defineField('name');
-    const [email, emailAttrs] = defineField('email');
-    const [dni, dniAttrs] = defineField('dni');
-    const [password, passwordAttrs] = defineField('password');
-    const [educationLevel, educationLevelAttrs] = defineField('educationLevel');
-    const [hireDate, hireDateAttrs] = defineField('hireDate');
-    const [role, roleAttrs] = defineField('role');
+    const [version, versionAttrs] = defineField('version');
+    const [periodDurationDays, periodDurationDaysAttrs] = defineField('periodDurationDays');
+    const [totalPeriods, totalPeriodsAttrs] = defineField('totalPeriods');
+    const [minimumPassingScore, minimumPassingScoreAttrs] = defineField('minimumPassingScore');
+    const [certificateTemplatePdf, certificateTemplatePdfAttrs] = defineField('certificateTemplatePdf');
     const [status, statusAttrs] = defineField('status');
     const [projectId, projectIdAttrs] = defineField('projectId');
     const [areaId, areaIdAttrs] = defineField('areaId');
 
-    const normalizeStatus = (rawStatus: unknown): UserStatus => {
+    const normalizeStatus = (rawStatus: unknown): TrainingTemplateStatus => {
         if (rawStatus === 'INACTIVE') return 'INACTIVE';
         return 'ACTIVE';
     };
 
-    const normalizeUser = (raw: any, index: number, page: number, limit: number): UserItem | null => {
-        const id = raw?.id ?? raw?._id ?? raw?.uuid ?? raw?.userId;
-        const rawName = raw?.name;
-        const rawEmail = raw?.email;
-
-        if (id == null || rawName == null || rawEmail == null) return null;
-
-        const rawProject = raw?.project;
+    const normalizeTemplate = (raw: any, index: number, page: number, limit: number): TrainingTemplateItem | null => {
+        const id = raw?.id ?? raw?._id ?? raw?.uuid ?? raw?.trainingTemplateId;
         const rawArea = raw?.area;
+        const rawProject = raw?.project ?? rawArea?.project;
+
+        if (id == null || raw?.name == null) return null;
+
+        const normalizedProjectId = raw?.projectId ?? rawProject?.id ?? rawArea?.projectId;
+        const normalizedAreaId = raw?.areaId ?? rawArea?.id;
+
+        if (!normalizedProjectId || !normalizedAreaId) return null;
 
         return {
             id: String(id),
-            name: String(rawName),
-            email: String(rawEmail),
-            dni: raw?.dni ? String(raw.dni) : null,
-            educationLevel: raw?.educationLevel ? String(raw.educationLevel) : null,
-            hireDate: raw?.hireDate ? String(raw.hireDate) : null,
-            role: String(raw?.role ?? ''),
+            name: String(raw.name),
+            version: Number(raw?.version ?? 0),
+            periodDurationDays: Number(raw?.periodDurationDays ?? 0),
+            totalPeriods: Number(raw?.totalPeriods ?? 0),
+            minimumPassingScore: Number(raw?.minimumPassingScore ?? 0),
+            certificateTemplatePdf: raw?.certificateTemplatePdf ? String(raw.certificateTemplatePdf) : null,
             status: normalizeStatus(raw?.status),
-            projectId: raw?.projectId ? String(raw.projectId) : rawProject?.id ? String(rawProject.id) : null,
-            areaId: raw?.areaId ? String(raw.areaId) : rawArea?.id ? String(rawArea.id) : null,
+            areaId: String(normalizedAreaId),
+            projectId: String(normalizedProjectId),
             project: rawProject
                 ? {
                       id: String(rawProject.id),
@@ -139,6 +123,13 @@ export const useUsers = () => {
                       name: String(rawArea.name),
                       status: rawArea.status ? String(rawArea.status) : undefined,
                       projectId: rawArea.projectId ? String(rawArea.projectId) : undefined,
+                      project: rawArea.project
+                          ? {
+                                id: String(rawArea.project.id),
+                                name: String(rawArea.project.name),
+                                status: rawArea.project.status ? String(rawArea.project.status) : undefined,
+                            }
+                          : undefined,
                   }
                 : undefined,
             createdAt: raw?.createdAt ? String(raw.createdAt) : undefined,
@@ -165,13 +156,15 @@ export const useUsers = () => {
                     ? apiData.total
                     : 0;
 
-        const items = Array.isArray(itemsRaw) ? itemsRaw.map((raw: any, index: number) => normalizeUser(raw, index, page, limit)).filter(Boolean) : [];
+        const items = Array.isArray(itemsRaw)
+            ? itemsRaw.map((raw: any, index: number) => normalizeTemplate(raw, index, page, limit)).filter(Boolean)
+            : [];
 
         return { items, page, limit, total };
     };
 
-    const buildListParams = (): UserListParams => {
-        const params: UserListParams = {
+    const buildListParams = (): TrainingTemplateListParams => {
+        const params: TrainingTemplateListParams = {
             page: pagination.page,
             limit: pagination.limit,
             sortBy: 'createdAt',
@@ -185,13 +178,16 @@ export const useUsers = () => {
         return params;
     };
 
-    const loadAreasByProject = async (currentProjectId: string) => {
+    const loadAreaOptions = async (currentProjectId: string, target: 'form' | 'filter') => {
+        const targetAreas = target === 'form' ? availableAreas : filterAreas;
+        const targetLoading = target === 'form' ? loadingAreas : loadingFilterAreas;
+
         if (!currentProjectId) {
-            availableAreas.value = [];
+            targetAreas.value = [];
             return;
         }
 
-        loadingAreas.value = true;
+        targetLoading.value = true;
         try {
             const aggregatedAreas: AreaMinimal[] = [];
             let currentPage = 1;
@@ -234,22 +230,39 @@ export const useUsers = () => {
                 currentPage = page + 1;
             }
 
-            availableAreas.value = aggregatedAreas;
+            targetAreas.value = aggregatedAreas;
         } catch {
-            availableAreas.value = [];
+            targetAreas.value = [];
         } finally {
-            loadingAreas.value = false;
+            targetLoading.value = false;
         }
     };
 
     watch(selectedProjectId, async (newProjectId) => {
         projectId.value = newProjectId;
-        await loadAreasByProject(newProjectId);
+        await loadAreaOptions(newProjectId, 'form');
 
         if (areaId.value && !availableAreas.value.find((area) => area.id === areaId.value)) {
             areaId.value = '';
         }
     });
+
+    watch(
+        () => filters.projectId,
+        async (newProjectId) => {
+            if (!newProjectId) {
+                filterAreas.value = [];
+                filters.areaId = '';
+                return;
+            }
+
+            await loadAreaOptions(newProjectId, 'filter');
+
+            if (filters.areaId && !filterAreas.value.find((area) => area.id === filters.areaId)) {
+                filters.areaId = '';
+            }
+        },
+    );
 
     const openCreate = () => {
         modalMode.value = 'create';
@@ -261,30 +274,25 @@ export const useUsers = () => {
         isModalOpen.value = true;
     };
 
-    const openEdit = async (user: UserItem) => {
+    const openEdit = async (template: TrainingTemplateItem) => {
         modalMode.value = 'edit';
-        editingId.value = user.id;
+        editingId.value = template.id;
         formError.value = null;
         resetForm();
 
-        selectedProjectId.value = user.projectId ?? '';
-        if (selectedProjectId.value) {
-            await loadAreasByProject(selectedProjectId.value);
-        } else {
-            availableAreas.value = [];
-        }
+        selectedProjectId.value = template.projectId;
+        await loadAreaOptions(template.projectId, 'form');
 
         setValues({
-            name: user.name,
-            email: user.email,
-            dni: user.dni ?? '',
-            password: '',
-            educationLevel: user.educationLevel ?? '',
-            hireDate: toDateInput(user.hireDate),
-            role: normalizeRole(user.role),
-            status: user.status,
-            projectId: user.projectId ?? '',
-            areaId: user.areaId ?? '',
+            name: template.name,
+            version: String(template.version),
+            periodDurationDays: String(template.periodDurationDays),
+            totalPeriods: String(template.totalPeriods),
+            minimumPassingScore: String(template.minimumPassingScore),
+            certificateTemplatePdf: template.certificateTemplatePdf ?? '',
+            status: template.status,
+            projectId: template.projectId,
+            areaId: template.areaId,
         });
 
         isModalOpen.value = true;
@@ -300,7 +308,7 @@ export const useUsers = () => {
         resetForm();
     };
 
-    const loadUsers = async () => {
+    const loadTrainingTemplates = async () => {
         loading.value = true;
         error.value = null;
 
@@ -309,17 +317,17 @@ export const useUsers = () => {
 
             if (res.status && res.data) {
                 const extracted = extractFromResponse(res);
-                users.value = extracted.items as UserItem[];
+                templates.value = extracted.items as TrainingTemplateItem[];
                 pagination.page = extracted.page;
                 pagination.limit = extracted.limit;
                 pagination.total = extracted.total;
             } else {
-                users.value = [];
+                templates.value = [];
                 pagination.total = 0;
             }
         } catch (e: any) {
-            error.value = e?.data?.message ?? 'Error al cargar usuarios';
-            users.value = [];
+            error.value = e?.data?.message ?? 'Error al cargar templates';
+            templates.value = [];
             pagination.total = 0;
         } finally {
             loading.value = false;
@@ -330,7 +338,7 @@ export const useUsers = () => {
         const page = Math.max(1, Math.min(totalPages.value, newPage));
         if (page === pagination.page) return;
         pagination.page = page;
-        await loadUsers();
+        await loadTrainingTemplates();
     };
 
     const changeLimit = async (newLimit: number) => {
@@ -341,7 +349,7 @@ export const useUsers = () => {
 
         pagination.limit = limit;
         pagination.page = 1;
-        await loadUsers();
+        await loadTrainingTemplates();
     };
 
     const setFilter = (key: keyof typeof filters, value: string) => {
@@ -349,46 +357,32 @@ export const useUsers = () => {
         pagination.page = 1;
     };
 
-    const handleDelete = async (user: UserItem) => {
-        const confirmed = await confirmAlert(`¿Eliminar el usuario "${user.name}"?`);
+    const handleDelete = async (template: TrainingTemplateItem) => {
+        const confirmed = await confirmAlert(`¿Eliminar el template "${template.name}"?`);
         if (!confirmed) return;
 
         try {
-            await svc.remove(user.id);
-            await successAlert('Usuario eliminado correctamente.');
-            await loadUsers();
+            await svc.remove(template.id);
+            await successAlert('Template eliminado correctamente.');
+            await loadTrainingTemplates();
         } catch (e: any) {
-            await errorAlert(e?.data?.message ?? 'Error al eliminar el usuario.');
+            await errorAlert(e?.data?.message ?? 'Error al eliminar el template.');
         }
     };
 
-    const buildPayload = (values: Record<string, any>): UserUpsertPayload => {
-        const payload: UserUpsertPayload = {
-            name: String(values.name).trim(),
-            email: String(values.email).trim(),
-            dni: values.dni ? String(values.dni).trim() : null,
-            educationLevel: values.educationLevel ? String(values.educationLevel).trim() : null,
-            hireDate: toIsoDate(String(values.hireDate)),
-            role: values.role as UserRole,
-            status: values.status as UserStatus,
-            projectId: selectedProjectId.value || null,
-            areaId: values.areaId ? String(values.areaId) : null,
-        };
-
-        const nextPassword = values.password ? String(values.password).trim() : '';
-        if (nextPassword) {
-            payload.password = nextPassword;
-        }
-
-        return payload;
-    };
+    const buildPayload = (values: Record<string, any>): TrainingTemplateUpsertPayload => ({
+        name: String(values.name).trim(),
+        version: Number(values.version),
+        periodDurationDays: Number(values.periodDurationDays),
+        totalPeriods: Number(values.totalPeriods),
+        minimumPassingScore: Number(values.minimumPassingScore),
+        certificateTemplatePdf: values.certificateTemplatePdf ? String(values.certificateTemplatePdf).trim() : '',
+        status: values.status as TrainingTemplateStatus,
+        projectId: String(values.projectId),
+        areaId: String(values.areaId),
+    });
 
     const onSubmit = handleSubmit(async (values) => {
-        if (modalMode.value === 'create' && !values.password?.trim()) {
-            setFieldError('password', 'La contraseña es obligatoria');
-            return;
-        }
-
         await submit({
             payload: () => buildPayload(values),
             onCreate: (payload) => svc.create(payload),
@@ -398,27 +392,29 @@ export const useUsers = () => {
             saving,
             formError,
             successMessage: {
-                create: 'Usuario creado correctamente.',
-                update: 'Usuario actualizado correctamente.',
+                create: 'Template creado correctamente.',
+                update: 'Template actualizado correctamente.',
             },
             onSuccess: async () => {
                 closeModal(true);
-                await loadUsers();
+                await loadTrainingTemplates();
             },
         });
     });
 
     onMounted(() => {
-        loadUsers();
+        loadTrainingTemplates();
     });
 
     return {
         loading,
         error,
-        users,
+        templates,
         pagination,
         totalPages,
         filters,
+        filterAreas,
+        loadingFilterAreas,
         selectedProjectId,
         availableAreas,
         loadingAreas,
@@ -428,18 +424,16 @@ export const useUsers = () => {
         formError,
         name,
         nameAttrs,
-        email,
-        emailAttrs,
-        dni,
-        dniAttrs,
-        password,
-        passwordAttrs,
-        educationLevel,
-        educationLevelAttrs,
-        hireDate,
-        hireDateAttrs,
-        role,
-        roleAttrs,
+        version,
+        versionAttrs,
+        periodDurationDays,
+        periodDurationDaysAttrs,
+        totalPeriods,
+        totalPeriodsAttrs,
+        minimumPassingScore,
+        minimumPassingScoreAttrs,
+        certificateTemplatePdf,
+        certificateTemplatePdfAttrs,
         status,
         statusAttrs,
         projectId,
@@ -447,11 +441,11 @@ export const useUsers = () => {
         areaId,
         areaIdAttrs,
         errors,
-        loadUsers,
-        loadAreasByProject,
+        loadTrainingTemplates,
         changePage,
         changeLimit,
         setFilter,
+        loadAreaOptions,
         openCreate,
         openEdit,
         closeModal,

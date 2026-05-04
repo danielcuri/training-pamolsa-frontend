@@ -54,23 +54,48 @@ export const useOperations = () => {
 
         loadingAreas.value = true;
         try {
-            const res = await areaSvc.list({
-                projectId,
-                limit: 100, // Traer todas las áreas del proyecto
-            });
+            const aggregatedAreas: AreaMinimal[] = [];
+            let currentPage = 1;
+            let totalPagesToFetch = 1;
 
-            const apiData = res?.data;
-            const itemsRaw = Array.isArray(apiData) ? apiData : (apiData?.items ?? apiData?.list ?? apiData?.data ?? []);
+            while (currentPage <= totalPagesToFetch) {
+                const res = await areaSvc.list({
+                    projectId,
+                    page: currentPage,
+                    limit: 100,
+                });
 
-            availableAreas.value = Array.isArray(itemsRaw)
-                ? itemsRaw
-                      .filter((raw: any) => raw?.status === 'ACTIVE')
-                      .map((raw: any) => ({
-                          id: String(raw?.id),
-                          name: String(raw?.name),
-                          status: raw?.status,
-                      }))
-                : [];
+                const apiData: any = res?.data;
+                const meta: any = res?.meta ?? apiData?.meta ?? {};
+                const itemsRaw = Array.isArray(apiData) ? apiData : (apiData?.items ?? apiData?.list ?? apiData?.data ?? []);
+                const page = typeof meta?.page === 'number' ? meta.page : typeof apiData?.page === 'number' ? apiData.page : currentPage;
+                const limit = typeof meta?.limit === 'number' ? meta.limit : typeof apiData?.limit === 'number' ? apiData.limit : 100;
+                const total =
+                    typeof meta?.total === 'number'
+                        ? meta.total
+                        : typeof meta?.totalItems === 'number'
+                          ? meta.totalItems
+                          : typeof apiData?.total === 'number'
+                            ? apiData.total
+                            : aggregatedAreas.length + (Array.isArray(itemsRaw) ? itemsRaw.length : 0);
+
+                if (Array.isArray(itemsRaw)) {
+                    aggregatedAreas.push(
+                        ...itemsRaw
+                            .filter((raw: any) => raw?.status === 'ACTIVE')
+                            .map((raw: any) => ({
+                                id: String(raw?.id),
+                                name: String(raw?.name),
+                                status: raw?.status,
+                            })),
+                    );
+                }
+
+                totalPagesToFetch = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+                currentPage = page + 1;
+            }
+
+            availableAreas.value = aggregatedAreas;
         } catch (e: any) {
             availableAreas.value = [];
         } finally {
