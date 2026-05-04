@@ -181,8 +181,8 @@ export const useAreas = () => {
         isModalOpen.value = true;
     };
 
-    const closeModal = () => {
-        if (saving.value) return;
+    const closeModal = (force = false) => {
+        if (saving.value && !force) return;
         isModalOpen.value = false;
         editingId.value = null;
         formError.value = null;
@@ -256,7 +256,7 @@ export const useAreas = () => {
                 update: 'Área actualizada correctamente.',
             },
             onSuccess: async () => {
-                closeModal();
+                closeModal(true);
                 await loadAreas();
             },
         });

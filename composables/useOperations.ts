@@ -263,8 +263,8 @@ export const useOperations = () => {
         isModalOpen.value = true;
     };
 
-    const closeModal = () => {
-        if (saving.value) return;
+    const closeModal = (force = false) => {
+        if (saving.value && !force) return;
         isModalOpen.value = false;
         editingId.value = null;
         formError.value = null;
@@ -343,7 +343,7 @@ export const useOperations = () => {
                 update: 'Operación actualizada correctamente.',
             },
             onSuccess: async () => {
-                closeModal();
+                closeModal(true);
                 await loadOperations();
             },
         });
