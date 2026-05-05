@@ -80,7 +80,7 @@
                 <template #action="slotProps">
                     <div class="flex items-center justify-end gap-2">
                         <client-only>
-                            <button type="button" v-tippy="'Ver'" @click.prevent>
+                            <button type="button" v-tippy="'Ver'" @click="emit('view', slotProps.value)">
                                 <icon-eye />
                             </button>
                             <button type="button" v-tippy="'Editar'" @click="emit('edit', slotProps.value)">
@@ -128,6 +128,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
+    view: [template: TrainingTemplateItem];
     edit: [template: TrainingTemplateItem];
     delete: [template: TrainingTemplateItem];
     changePage: [page: number];

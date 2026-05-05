@@ -16,7 +16,7 @@
         <TrainingTemplateList :loading="loading" :error="error" :templates="templates" :projects="projects"
             :filter-areas="filterAreas" :loading-filter-areas="loadingFilterAreas" :pagination="pagination"
             :filters="filters" :on-load-filter-areas="(projectId) => loadAreaOptions(projectId, 'filter')"
-            @edit="openEdit" @delete="handleDelete" @change-page="handlePageChange"
+            @view="handleView" @edit="openEdit" @delete="handleDelete" @change-page="handlePageChange"
             @change-limit="handleLimitChange" @apply-filters="handleApplyFilters" />
 
         <TrainingTemplateModal v-model:name="name" v-model:version="version"
@@ -38,6 +38,7 @@ import TrainingTemplateList from '~/components/trainingTemplates/TrainingTemplat
 import TrainingTemplateModal from '~/components/trainingTemplates/TrainingTemplateModal.vue';
 import { useProjects } from '~/composables/useProjects';
 import { useTrainingTemplates } from '~/composables/useTrainingTemplates';
+import type { TrainingTemplateItem } from '~/types/trainingTemplate';
 
 definePageMeta({
     middleware: ['auth', 'role'],
@@ -107,5 +108,9 @@ const handleApplyFilters = async ({ projectId, areaId, search }: { projectId: st
     setFilter('areaId', areaId);
     setFilter('search', search);
     await loadTrainingTemplates();
+};
+
+const handleView = async (template: TrainingTemplateItem) => {
+    await navigateTo(`/training-templates/${template.id}/template-operation`);
 };
 </script>
