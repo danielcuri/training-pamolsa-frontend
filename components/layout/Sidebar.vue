@@ -100,7 +100,27 @@
                                                 <icon-award class="shrink-0 group-hover:!text-primary" />
 
                                                 <span
-                                                    class="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">Templates</span>
+                                                    class="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">Training Templates</span>
+                                            </div>
+                                        </NuxtLink>
+                                    </li>
+                                    <li class="nav-item">
+                                        <NuxtLink to="/operational-score-sheet" class="group" @click="toggleMobileMenu">
+                                            <div class="flex items-center">
+                                                <icon-notes class="shrink-0 group-hover:!text-primary" />
+
+                                                <span
+                                                    class="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">Entrenamiento Operativo</span>
+                                            </div>
+                                        </NuxtLink>
+                                    </li>
+                                    <li class="nav-item">
+                                        <NuxtLink to="/training" class="group" @click="toggleMobileMenu">
+                                            <div class="flex items-center">
+                                                <icon-award class="shrink-0 group-hover:!text-primary" />
+
+                                                <span
+                                                    class="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">Training</span>
                                             </div>
                                         </NuxtLink>
                                     </li>

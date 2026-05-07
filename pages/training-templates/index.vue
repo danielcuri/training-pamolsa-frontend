@@ -2,7 +2,7 @@
     <div>
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h1 class="text-2xl font-extrabold uppercase text-primary">
-                Templates
+                Training Templates
             </h1>
 
             <div class="flex items-center gap-2">
