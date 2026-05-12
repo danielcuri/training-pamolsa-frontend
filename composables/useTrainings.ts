@@ -170,6 +170,7 @@ export const useTrainings = () => {
                 limit: 100,
                 sortBy: 'createdAt',
                 order: 'desc',
+                status: 'ACTIVE',
             });
             const apiData: any = res?.data;
             const meta: any = res?.meta ?? apiData?.meta ?? {};
@@ -188,7 +189,7 @@ export const useTrainings = () => {
             if (Array.isArray(itemsRaw)) {
                 aggregatedUsers.push(
                     ...itemsRaw
-                        .filter((raw: any) => raw?.id && raw?.name && raw?.status === 'ACTIVE')
+                        .filter((raw: any) => raw?.id && raw?.name)
                         .map((raw: any) => ({
                             id: String(raw.id),
                             name: String(raw.name),

@@ -23,6 +23,7 @@
             :filters="filters"
             :status-options="statusOptions"
             :result-options="resultOptions"
+            @view="handleView"
             @edit="openEdit"
             @delete="handleDelete"
             @change-page="handlePageChange"
@@ -128,5 +129,9 @@ const handleApplyFilters = async ({
     setFilter('result', result);
     setFilter('search', search);
     await loadTrainings();
+};
+
+const handleView = async (training: { id: string }) => {
+    await navigateTo(`/training/${training.id}/matrix`);
 };
 </script>

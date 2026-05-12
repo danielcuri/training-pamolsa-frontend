@@ -87,6 +87,7 @@ export interface UserListParams {
     limit?: number;
     projectId?: string;
     areaId?: string;
+    status?: UserStatus;
     search?: string;
     sortBy?: string;
     order?: 'asc' | 'desc';
