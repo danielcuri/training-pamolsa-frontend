@@ -18,10 +18,10 @@
                             </DialogTitle>
 
                             <div class="mt-5">
-                                <TemplateOperationForm v-model:name="nameProxy" v-model:description="descriptionProxy"
+                                <TemplateOperationForm v-model:name="nameProxy" v-model:code="codeProxy" v-model:description="descriptionProxy"
                                     v-model:priority="priorityProxy" v-model:weight-percent="weightPercentProxy"
                                     v-model:order="orderProxy" v-model:area-operation-id="areaOperationIdProxy" :name-attrs="nameAttrs"
-                                    :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
+                                    :code-attrs="codeAttrs" :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
                                     :weight-percent-attrs="weightPercentAttrs" :order-attrs="orderAttrs" :area-operation-id-attrs="areaOperationIdAttrs"
                                     :errors="errors" :saving="saving" :form-error="formError" :operation-options="operationOptions"
                                     :loading-operation-options="loadingOperationOptions" :template-project-name="templateProjectName"
@@ -55,6 +55,8 @@ interface Props {
     mode: 'create' | 'edit';
     name: string | undefined;
     nameAttrs: BaseFieldProps & GenericObject;
+    code: string | undefined;
+    codeAttrs: BaseFieldProps & GenericObject;
     description: string | undefined;
     descriptionAttrs: BaseFieldProps & GenericObject;
     priority: OperationPriority | undefined;
@@ -66,7 +68,7 @@ interface Props {
     areaOperationId: string | undefined;
     areaOperationIdAttrs: BaseFieldProps & GenericObject;
     errors: Partial<
-        Record<'name' | 'description' | 'priority' | 'weightPercent' | 'order' | 'areaOperationId', string | undefined>
+        Record<'name' | 'code' | 'description' | 'priority' | 'weightPercent' | 'order' | 'areaOperationId', string | undefined>
     >;
     saving: boolean;
     formError: string | null;
@@ -80,6 +82,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'update:name', value: string): void;
+    (e: 'update:code', value: string): void;
     (e: 'update:description', value: string): void;
     (e: 'update:priority', value: OperationPriority): void;
     (e: 'update:weightPercent', value: number | undefined): void;
@@ -93,6 +96,11 @@ const emit = defineEmits<{
 const nameProxy = computed({
     get: () => props.name,
     set: (value: string) => emit('update:name', value),
+});
+
+const codeProxy = computed({
+    get: () => props.code,
+    set: (value: string) => emit('update:code', value),
 });
 
 const descriptionProxy = computed({

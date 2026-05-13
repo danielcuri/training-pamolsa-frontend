@@ -109,6 +109,7 @@ export interface TrainingMatrixOperation {
     status?: string;
     areaOperationId: string;
     cartilla: string | null;
+    code?: string | null;
 }
 
 export interface TrainingMatrixScore {

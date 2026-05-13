@@ -55,6 +55,7 @@ export const useTemplateOperations = (templateId: string) => {
         validationSchema: toTypedSchema(templateOperationSchema),
         initialValues: {
             name: '',
+            code: '',
             description: '',
             priority: 'CRITICAL' as OperationPriority,
             weightPercent: 0,
@@ -64,6 +65,7 @@ export const useTemplateOperations = (templateId: string) => {
     });
 
     const [name, nameAttrs] = defineField('name');
+    const [code, codeAttrs] = defineField('code');
     const [description, descriptionAttrs] = defineField('description');
     const [priority, priorityAttrs] = defineField('priority');
     const [weightPercent, weightPercentAttrs] = defineField('weightPercent');
@@ -113,6 +115,7 @@ export const useTemplateOperations = (templateId: string) => {
         return {
             id: String(id),
             name: String(raw.name),
+            code: raw?.code != null ? String(raw.code) : undefined,
             description: raw?.description ? String(raw.description) : null,
             priority: normalizePriority(raw?.priority),
             weightPercent: Number(raw?.weightPercent ?? 0),
@@ -135,6 +138,7 @@ export const useTemplateOperations = (templateId: string) => {
         return {
             id: String(id),
             name: String(raw.name),
+            code: raw?.code != null ? String(raw.code) : undefined,
             description: raw?.description ? String(raw.description) : undefined,
             weightPercent: Number(raw?.weightPercent ?? 0),
             priority: normalizePriority(raw?.priority),
@@ -317,6 +321,7 @@ export const useTemplateOperations = (templateId: string) => {
 
         setValues({
             name: selectedOperation.name,
+            code: selectedOperation.code ?? '',
             description: selectedOperation.description ?? '',
             priority: selectedOperation.priority,
             weightPercent: selectedOperation.weightPercent ?? 0,
@@ -354,6 +359,7 @@ export const useTemplateOperations = (templateId: string) => {
 
         setValues({
             name: source.name,
+            code: source.code ?? '',
             description: source.description ?? '',
             priority: source.priority,
             weightPercent: source.weightPercent,
@@ -408,10 +414,11 @@ export const useTemplateOperations = (templateId: string) => {
         }
     };
 
-    const buildPayload = (values: Record<string, any>): TemplateOperationUpsertPayload => ({
-        name: String(values.name).trim(),
-        description: values.description ? String(values.description).trim() : '',
-        priority: normalizePriority(values.priority),
+const buildPayload = (values: Record<string, any>): TemplateOperationUpsertPayload => ({
+    name: String(values.name).trim(),
+    code: String(values.code).trim(),
+    description: values.description ? String(values.description).trim() : '',
+    priority: normalizePriority(values.priority),
         weightPercent: Number(values.weightPercent),
         order: Number(values.order),
         areaOperationId: String(values.areaOperationId),
@@ -457,6 +464,8 @@ export const useTemplateOperations = (templateId: string) => {
         formError,
         name,
         nameAttrs,
+        code,
+        codeAttrs,
         description,
         descriptionAttrs,
         priority,

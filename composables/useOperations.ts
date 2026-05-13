@@ -126,6 +126,7 @@ export const useOperations = () => {
         validationSchema: toTypedSchema(operationSchema),
         initialValues: {
             name: '',
+            code: '',
             description: '',
             priority: 'CRITICAL' as OperationPriority,
             weightPercent: undefined as number | undefined,
@@ -135,6 +136,7 @@ export const useOperations = () => {
     });
 
     const [name, nameAttrs] = defineField('name');
+    const [code, codeAttrs] = defineField('code');
     const [description, descriptionAttrs] = defineField('description');
     const [priority, priorityAttrs] = defineField('priority');
     const [weightPercent, weightPercentAttrs] = defineField('weightPercent');
@@ -170,6 +172,7 @@ export const useOperations = () => {
         return {
             id: String(id),
             name: String(rawName),
+            code: raw?.code != null ? String(raw.code) : undefined,
             description: raw?.description,
             weightPercent: raw?.weightPercent,
             priority: rawPriority,
@@ -278,6 +281,7 @@ export const useOperations = () => {
 
         setValues({
             name: operation.name,
+            code: operation.code ?? '',
             description: operation.description ?? '',
             priority: operation.priority,
             weightPercent: operation.weightPercent !== undefined ? Number(operation.weightPercent) : undefined,
@@ -351,6 +355,7 @@ export const useOperations = () => {
         await submit({
             payload: () => ({
                 name: values.name,
+                code: String(values.code ?? ''),
                 description: values.description,
                 priority: values.priority as OperationPriority,
                 weightPercent: values.weightPercent,
@@ -399,6 +404,8 @@ export const useOperations = () => {
         // form fields
         name,
         nameAttrs,
+        code,
+        codeAttrs,
         description,
         descriptionAttrs,
         priority,

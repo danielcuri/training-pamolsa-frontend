@@ -72,7 +72,7 @@
                         <div class="pr-3 pt-2 text-right text-slate-700">Cartilla asociada:</div>
                         <template v-for="operation in orderedOperations" :key="`${operation.id}-cartilla`">
                             <div class="rounded-b-md border border-slate-300 bg-white py-2 text-center font-semibold text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.06)]">
-                                {{ operation.cartilla || '-' }}
+                                {{ operation.code || operation.cartilla || '-' }}
                             </div>
                         </template>
                     </div>

@@ -25,9 +25,9 @@
             :filters="filters" @edit="openEdit" @delete="handleDelete" @change-page="handlePageChange"
             @change-limit="handleLimitChange" @apply-filters="handleApplyFilters" />
 
-        <TemplateOperationModal v-model:name="name" v-model:description="description" v-model:priority="priority"
+        <TemplateOperationModal v-model:name="name" v-model:code="code" v-model:description="description" v-model:priority="priority"
             v-model:weight-percent="weightPercent" v-model:order="order" v-model:area-operation-id="areaOperationId"
-            :name-attrs="nameAttrs" :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
+            :name-attrs="nameAttrs" :code-attrs="codeAttrs" :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
             :weight-percent-attrs="weightPercentAttrs" :order-attrs="orderAttrs" :area-operation-id-attrs="areaOperationIdAttrs" :errors="errors"
             :is-open="isModalOpen" :mode="modalMode" :saving="saving" :form-error="formError"
             :operation-options="operationOptions" :loading-operation-options="loadingOperationOptions"
@@ -64,6 +64,8 @@ const {
     formError,
     name,
     nameAttrs,
+    code,
+    codeAttrs,
     description,
     descriptionAttrs,
     priority,

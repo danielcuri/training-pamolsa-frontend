@@ -6,6 +6,7 @@ type FieldAttrs = BaseFieldProps & GenericObject;
 export interface TemplateOperation {
     id: string;
     name: string;
+    code?: string;
     description?: string | null;
     priority: OperationPriority;
     weightPercent: number;
@@ -21,6 +22,8 @@ export interface TemplateOperation {
 export interface TemplateOperationForm {
     name: string | undefined;
     nameAttrs: FieldAttrs;
+    code: string | undefined;
+    codeAttrs: FieldAttrs;
     description: string | undefined;
     descriptionAttrs: FieldAttrs;
     priority: OperationPriority | undefined;
@@ -38,6 +41,7 @@ export interface TemplateOperationForm {
 
 export interface TemplateOperationUpsertPayload {
     name: string;
+    code: string;
     description?: string;
     priority: OperationPriority;
     weightPercent: number;

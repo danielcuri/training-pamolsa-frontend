@@ -37,6 +37,12 @@
                     {{ value.rowIndex }}
                 </template>
 
+                <template #code="{ value }">
+                    <span class="text-sm text-gray-600">
+                        {{ value.code || '-' }}
+                    </span>
+                </template>
+
                 <template #description="{ value }">
                     <span class="block max-w-[220px] truncate text-sm text-gray-600">
                         {{ value.description || '-' }}
@@ -128,6 +134,7 @@ watch(
 const columns = ref([
     { field: 'rowIndex', title: '#', width: '60px', sort: false },
     { field: 'name', title: 'Nombre', sort: true },
+    { field: 'code', title: 'Codigo', sort: true, width: '140px' },
     { field: 'description', title: 'Descripción', sort: false, width: '220px' },
     { field: 'priority', title: 'Prioridad', sort: false, width: '130px' },
     { field: 'weightPercent', title: 'Peso', sort: false, width: '90px' },

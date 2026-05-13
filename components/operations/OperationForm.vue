@@ -48,6 +48,15 @@
             </p>
         </div>
 
+        <div>
+            <label for="operation-code">Código</label>
+            <input id="operation-code" v-model="codeProxy" v-bind="codeAttrs" type="text" class="form-input"
+                :class="{ 'border-red-500': errors?.code }" :disabled="saving" placeholder="Código de la operación" />
+            <p v-if="errors?.code" class="mt-1 text-xs text-red-500">
+                {{ errors.code }}
+            </p>
+        </div>
+
         <!-- Description -->
         <div>
             <label for="operation-description">Descripción</label>
@@ -126,6 +135,8 @@ import type { Project } from '~/types/project';
 interface Props {
     name: string | undefined;
     nameAttrs: BaseFieldProps & GenericObject;
+    code: string | undefined;
+    codeAttrs: BaseFieldProps & GenericObject;
     description: string | undefined;
     descriptionAttrs: BaseFieldProps & GenericObject;
     priority: OperationPriority | undefined;
@@ -136,7 +147,7 @@ interface Props {
     statusAttrs: BaseFieldProps & GenericObject;
     areaId: string | undefined;
     areaIdAttrs: BaseFieldProps & GenericObject;
-    errors: Partial<Record<'name' | 'description' | 'priority' | 'weightPercent' | 'status' | 'areaId', string | undefined>>;
+    errors: Partial<Record<'name' | 'code' | 'description' | 'priority' | 'weightPercent' | 'status' | 'areaId', string | undefined>>;
     saving: boolean;
     formError: string | null;
     mode: 'create' | 'edit';
@@ -151,6 +162,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'update:name', value: string): void;
+    (e: 'update:code', value: string): void;
     (e: 'update:description', value: string): void;
     (e: 'update:priority', value: OperationPriority): void;
     (e: 'update:weightPercent', value: number | undefined): void;
@@ -165,6 +177,11 @@ const emit = defineEmits<{
 const nameProxy = computed({
     get: () => props.name ?? '',
     set: (v: string) => emit('update:name', v),
+});
+
+const codeProxy = computed({
+    get: () => props.code ?? '',
+    set: (v: string) => emit('update:code', v),
 });
 
 const descriptionProxy = computed({

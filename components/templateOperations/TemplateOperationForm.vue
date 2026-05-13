@@ -37,6 +37,15 @@
         </div>
 
         <div>
+            <label for="template-operation-code">Codigo</label>
+            <input id="template-operation-code" v-model="codeProxy" v-bind="codeAttrs" type="text" class="form-input"
+                :class="{ 'border-red-500': errors?.code }" :disabled="saving" placeholder="Codigo de la operacion" />
+            <p v-if="errors?.code" class="mt-1 text-xs text-red-500">
+                {{ errors.code }}
+            </p>
+        </div>
+
+        <div>
             <label for="template-operation-description">Descripcion</label>
             <textarea id="template-operation-description" v-model="descriptionProxy" v-bind="descriptionAttrs"
                 class="form-textarea" :class="{ 'border-red-500': errors?.description }" :disabled="saving"
@@ -106,6 +115,8 @@ import type { Operation, OperationPriority } from '~/types/operation';
 interface Props {
     name: string | undefined;
     nameAttrs: BaseFieldProps & GenericObject;
+    code: string | undefined;
+    codeAttrs: BaseFieldProps & GenericObject;
     description: string | undefined;
     descriptionAttrs: BaseFieldProps & GenericObject;
     priority: OperationPriority | undefined;
@@ -117,7 +128,7 @@ interface Props {
     areaOperationId: string | undefined;
     areaOperationIdAttrs: BaseFieldProps & GenericObject;
     errors: Partial<
-        Record<'name' | 'description' | 'priority' | 'weightPercent' | 'order' | 'areaOperationId', string | undefined>
+        Record<'name' | 'code' | 'description' | 'priority' | 'weightPercent' | 'order' | 'areaOperationId', string | undefined>
     >;
     saving: boolean;
     formError: string | null;
@@ -131,6 +142,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'update:name', value: string): void;
+    (e: 'update:code', value: string): void;
     (e: 'update:description', value: string): void;
     (e: 'update:priority', value: OperationPriority): void;
     (e: 'update:weightPercent', value: number | undefined): void;
@@ -144,6 +156,11 @@ const emit = defineEmits<{
 const nameProxy = computed({
     get: () => props.name ?? '',
     set: (value: string) => emit('update:name', value),
+});
+
+const codeProxy = computed({
+    get: () => props.code ?? '',
+    set: (value: string) => emit('update:code', value),
 });
 
 const descriptionProxy = computed({

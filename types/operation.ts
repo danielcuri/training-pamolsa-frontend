@@ -31,6 +31,7 @@ export interface AreaWithProject {
 export interface Operation {
     id: string;
     name: string;
+    code?: string;
     description?: string;
     weightPercent?: number;
     priority: OperationPriority;
@@ -47,6 +48,8 @@ export interface Operation {
 export interface OperationForm {
     name: string | undefined;
     nameAttrs: FieldAttrs;
+    code: string | undefined;
+    codeAttrs: FieldAttrs;
     description: string | undefined;
     descriptionAttrs: FieldAttrs;
     priority: OperationPriority | undefined;
@@ -57,13 +60,14 @@ export interface OperationForm {
     statusAttrs: FieldAttrs;
     areaId: string | undefined; // ← Seleccionado según proyecto
     areaIdAttrs: FieldAttrs;
-    errors: Partial<Record<'name' | 'description' | 'priority' | 'weightPercent' | 'status' | 'areaId', string | undefined>>;
+    errors: Partial<Record<'name' | 'code' | 'description' | 'priority' | 'weightPercent' | 'status' | 'areaId', string | undefined>>;
 }
 
 // ============ PAYLOADS API ============
 // Para crear/actualizar (lo que envías al backend)
 export interface OperationUpsertPayload {
     name: string;
+    code: string;
     description?: string;
     priority: OperationPriority;
     weightPercent?: number;

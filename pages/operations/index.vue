@@ -21,10 +21,10 @@
             @filter-priority="handlePriorityFilter" />
 
         <!-- MODAL -->
-        <OperationModal v-model:name="name" v-model:description="description" v-model:priority="priority"
+        <OperationModal v-model:name="name" v-model:code="code" v-model:description="description" v-model:priority="priority"
             v-model:weight-percent="weightPercent" v-model:status="status" v-model:area-id="areaId"
             v-model:selected-project-id="selectedProjectId" :name-attrs="nameAttrs"
-            :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
+            :code-attrs="codeAttrs" :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
             :weight-percent-attrs="weightPercentAttrs" :status-attrs="statusAttrs" :area-id-attrs="areaIdAttrs"
             :errors="errors" :is-open="isModalOpen" :mode="modalMode" :saving="saving" :form-error="formError"
             :projects="projects" :available-areas="availableAreas" :loading-areas="loadingAreas" @close="closeModal"
@@ -66,6 +66,8 @@ const {
     // Form
     name,
     nameAttrs,
+    code,
+    codeAttrs,
     description,
     descriptionAttrs,
     priority,
