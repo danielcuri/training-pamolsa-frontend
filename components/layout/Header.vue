@@ -18,22 +18,22 @@
                 <div class="hidden ltr:mr-2 rtl:ml-2 sm:block">
                     <ul class="flex items-center space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]">
                         <li>
-                            <NuxtLink to="/apps/calendar"
+                            <button type="button"
                                 class="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
                                 <icon-calendar />
-                            </NuxtLink>
+                            </button>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/todolist"
+                            <button type="button"
                                 class="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
                                 <icon-edit />
-                            </NuxtLink>
+                            </button>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/chat"
+                            <button type="button"
                                 class="block rounded-full bg-white-light/40 p-2 hover:bg-white-light/90 hover:text-primary dark:bg-dark/40 dark:hover:bg-dark/60">
                                 <icon-chat-notification />
-                            </NuxtLink>
+                            </button>
                         </li>
                     </ul>
                 </div>
@@ -289,35 +289,32 @@
                                             </div>
                                         </li>
                                         <li>
-                                            <NuxtLink to="/users/profile" class="dark:hover:text-white"
-                                                @click="close()">
+                                            <button type="button" class="dark:hover:text-white" @click="close()">
                                                 <icon-user class="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
 
                                                 Profile
-                                            </NuxtLink>
+                                            </button>
                                         </li>
                                         <li>
-                                            <NuxtLink to="/apps/mailbox" class="dark:hover:text-white" @click="close()">
+                                            <button type="button" class="dark:hover:text-white" @click="close()">
                                                 <icon-mail class="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
 
                                                 Inbox
-                                            </NuxtLink>
+                                            </button>
                                         </li>
                                         <li>
-                                            <NuxtLink to="/auth/boxed-lockscreen" class="dark:hover:text-white"
-                                                @click="close()">
+                                            <button type="button" class="dark:hover:text-white" @click="close()">
                                                 <icon-lock-dots class="h-4.5 w-4.5 shrink-0 ltr:mr-2 rtl:ml-2" />
 
                                                 Lock Screen
-                                            </NuxtLink>
+                                            </button>
                                         </li>
                                         <li class="border-t border-white-light dark:border-white-light/10">
-                                            <NuxtLink to="/auth/boxed-signin" class="!py-3 text-danger"
-                                                @click="close()">
+                                            <button type="button" class="!py-3 text-danger" @click="close()">
                                                 <icon-logout class="h-4.5 w-4.5 shrink-0 rotate-90 ltr:mr-2 rtl:ml-2" />
 
                                                 Sign Out
-                                            </NuxtLink>
+                                            </button>
                                         </li>
                                     </ul>
                                 </template>
@@ -346,13 +343,13 @@
                             <NuxtLink to="/">{{ $t('sales') }}</NuxtLink>
                         </li>
                         <li>
-                            <NuxtLink to="/analytics">{{ $t('analytics') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('analytics') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/finance">{{ $t('finance') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('finance') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/crypto">{{ $t('crypto') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('crypto') }}</a>
                         </li>
                     </ul>
                 </li>
@@ -369,22 +366,22 @@
                     </a>
                     <ul class="sub-menu">
                         <li>
-                            <NuxtLink to="/apps/chat">{{ $t('chat') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('chat') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/mailbox">{{ $t('mailbox') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('mailbox') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/todolist">{{ $t('todo_list') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('todo_list') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/notes">{{ $t('notes') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('notes') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/scrumboard">{{ $t('scrumboard') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('scrumboard') }}</a>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/contacts">{{ $t('contacts') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('contacts') }}</a>
                         </li>
                         <li class="relative">
                             <a href="javascript:;">{{ $t('invoice') }}
@@ -395,21 +392,21 @@
                             <ul
                                 class="absolute top-0 z-[10] hidden min-w-[180px] rounded bg-white p-0 py-2 text-dark shadow ltr:left-[95%] rtl:right-[95%] dark:bg-[#1b2e4b] dark:text-white-dark">
                                 <li>
-                                    <NuxtLink to="/apps/invoice/list">{{ $t('list') }}</NuxtLink>
+                                    <a href="javascript:;">{{ $t('list') }}</a>
                                 </li>
                                 <li>
-                                    <NuxtLink to="/apps/invoice/preview">{{ $t('preview') }}</NuxtLink>
+                                    <a href="javascript:;">{{ $t('preview') }}</a>
                                 </li>
                                 <li>
-                                    <NuxtLink to="/apps/invoice/add">{{ $t('add') }}</NuxtLink>
+                                    <a href="javascript:;">{{ $t('add') }}</a>
                                 </li>
                                 <li>
-                                    <NuxtLink to="/apps/invoice/edit">{{ $t('edit') }}</NuxtLink>
+                                    <a href="javascript:;">{{ $t('edit') }}</a>
                                 </li>
                             </ul>
                         </li>
                         <li>
-                            <NuxtLink to="/apps/calendar">{{ $t('calendar') }}</NuxtLink>
+                            <a href="javascript:;">{{ $t('calendar') }}</a>
                         </li>
                     </ul>
                 </li>

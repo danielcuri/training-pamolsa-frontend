@@ -34,6 +34,12 @@
                     {{ value.rowIndex }}
                 </template>
 
+                <template #code="{ value }">
+                    <span class="text-sm text-gray-600">
+                        {{ value.code || '-' }}
+                    </span>
+                </template>
+
 
 
                 <!-- Template para description (opcional, truncado) -->
@@ -148,6 +154,7 @@ const selectedPriority = ref<OperationPriority | ''>('')
 const columns = ref([
     { field: 'rowIndex', title: '#', width: '60px', sort: false },
     { field: 'name', title: 'Nombre', sort: true },
+    { field: 'code', title: 'Código', sort: true, width: '140px' },
     { field: 'description', title: 'Descripción', sort: false, width: '200px' },
     { field: 'priority', title: 'Prioridad', sort: false, width: '120px' },
     { field: 'weightPercent', title: 'Peso', sort: false, width: '100px' },

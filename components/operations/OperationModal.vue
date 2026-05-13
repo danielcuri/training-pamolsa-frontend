@@ -18,11 +18,11 @@
                             </DialogTitle>
 
                             <div class="mt-5">
-                                <OperationForm v-model:name="nameProxy" v-model:description="descriptionProxy"
+                                <OperationForm v-model:name="nameProxy" v-model:code="codeProxy" v-model:description="descriptionProxy"
                                     v-model:priority="priorityProxy" v-model:weight-percent="weightPercentForForm"
                                     v-model:status="statusProxy" v-model:area-id="areaIdProxy"
                                     v-model:selected-project-id="selectedProjectIdProxy" :name-attrs="nameAttrs"
-                                    :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
+                                    :code-attrs="codeAttrs" :description-attrs="descriptionAttrs" :priority-attrs="priorityAttrs"
                                     :weight-percent-attrs="weightPercentAttrs" :status-attrs="statusAttrs"
                                     :area-id-attrs="areaIdAttrs" :errors="errors" :saving="saving"
                                     :form-error="formError" :mode="mode" :projects="projects"
@@ -56,6 +56,8 @@ interface Props {
     mode: 'create' | 'edit';
     name: string | undefined;
     nameAttrs: BaseFieldProps & GenericObject;
+    code: string | undefined;
+    codeAttrs: BaseFieldProps & GenericObject;
     description: string | undefined;
     descriptionAttrs: BaseFieldProps & GenericObject;
     priority: OperationPriority | undefined;
@@ -66,7 +68,7 @@ interface Props {
     statusAttrs: BaseFieldProps & GenericObject;
     areaId: string | undefined;
     areaIdAttrs: BaseFieldProps & GenericObject;
-    errors: Partial<Record<'name' | 'description' | 'priority' | 'weightPercent' | 'status' | 'areaId', string | undefined>>;
+    errors: Partial<Record<'name' | 'code' | 'description' | 'priority' | 'weightPercent' | 'status' | 'areaId', string | undefined>>;
     saving: boolean;
     formError: string | null;
     // Selects anidados
@@ -80,6 +82,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'update:name', value: string): void;
+    (e: 'update:code', value: string): void;
     (e: 'update:description', value: string): void;
     (e: 'update:priority', value: OperationPriority): void;
     (e: 'update:weightPercent', value: number | undefined): void;
@@ -94,6 +97,11 @@ const emit = defineEmits<{
 const nameProxy = computed({
     get: () => props.name,
     set: (v: string) => emit('update:name', v),
+});
+
+const codeProxy = computed({
+    get: () => props.code,
+    set: (v: string) => emit('update:code', v),
 });
 
 const descriptionProxy = computed({

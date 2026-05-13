@@ -14,6 +14,11 @@ export const operationSchema = z.object({
         .min(3, 'El nombre debe tener al menos 3 caracteres')
         .max(100, 'El nombre no puede superar 100 caracteres'),
 
+    code: z
+        .string()
+        .min(1, 'El codigo es obligatorio')
+        .max(100, 'El codigo no puede superar 100 caracteres'),
+
     description: z.string().max(500, 'La descripción no puede superar 500 caracteres').optional(),
 
     priority: z.nativeEnum(OperationPriority, {
