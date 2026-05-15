@@ -32,6 +32,8 @@
         />
 
         <TrainingModal
+            v-model:selected-project-id="selectedProjectId"
+            v-model:selected-area-id="selectedAreaId"
             v-model:user-id="userId"
             v-model:template-id="templateId"
             v-model:start-date="startDate"
@@ -47,8 +49,11 @@
             :mode="modalMode"
             :saving="saving"
             :form-error="formError"
-            :users="users"
-            :templates="templates"
+            :projects="projects"
+            :available-areas="availableAreas"
+            :loading-areas="loadingAreas"
+            :users="formUsers"
+            :templates="formTemplates"
             :status-options="statusOptions"
             :result-options="resultOptions"
             @close="closeModal"
@@ -76,6 +81,13 @@ const {
     trainings,
     users,
     templates,
+    formUsers,
+    formTemplates,
+    projects,
+    availableAreas,
+    loadingAreas,
+    selectedProjectId,
+    selectedAreaId,
     pagination,
     filters,
     isModalOpen,

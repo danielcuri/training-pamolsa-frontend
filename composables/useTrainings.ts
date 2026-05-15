@@ -1,11 +1,15 @@
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
+import { areaService } from '~/services/areaService';
+import { projectService } from '~/services/projectService';
 import { trainingSchema } from '~/schemas/training.schema';
 import { trainingService } from '~/services/trainingService';
 import { trainingTemplateService } from '~/services/trainingTemplateService';
 import { userService } from '~/services/userService';
 import { useFormSubmit } from './useFormSubmit';
+import type { AreaMinimal } from '~/types/operation';
+import type { Project } from '~/types/project';
 import type {
     TrainingItem,
     TrainingListParams,
@@ -22,6 +26,8 @@ const toDateInput = (value?: string | null) => (value ? value.slice(0, 10) : '')
 export const useTrainings = () => {
     const { apiFetch } = useApiFetch();
     const svc = trainingService(apiFetch);
+    const areaSvc = areaService(apiFetch);
+    const projectSvc = projectService(apiFetch);
     const templateSvc = trainingTemplateService(apiFetch);
     const userSvc = userService(apiFetch);
     const { submit } = useFormSubmit();
@@ -35,6 +41,13 @@ export const useTrainings = () => {
     const trainings = ref<TrainingItem[]>([]);
     const users = ref<TrainingUserOption[]>([]);
     const templates = ref<TrainingTemplateOption[]>([]);
+    const formUsers = ref<TrainingUserOption[]>([]);
+    const formTemplates = ref<TrainingTemplateOption[]>([]);
+    const projects = ref<Project[]>([]);
+    const availableAreas = ref<AreaMinimal[]>([]);
+    const loadingAreas = ref(false);
+    const selectedProjectId = ref('');
+    const selectedAreaId = ref('');
 
     const filters = reactive({
         userId: '' as string | undefined,
@@ -194,6 +207,8 @@ export const useTrainings = () => {
                             id: String(raw.id),
                             name: String(raw.name),
                             email: raw?.email ? String(raw.email) : null,
+                            projectId: raw?.projectId ? String(raw.projectId) : raw?.project?.id ? String(raw.project.id) : raw?.area?.projectId ? String(raw.area.projectId) : null,
+                            areaId: raw?.areaId ? String(raw.areaId) : raw?.area?.id ? String(raw.area.id) : null,
                         })),
                 );
             }
@@ -234,6 +249,8 @@ export const useTrainings = () => {
                             id: String(raw.id),
                             name: String(raw.name),
                             version: typeof raw?.version === 'number' ? raw.version : Number(raw?.version ?? 0),
+                            projectId: String(raw?.projectId ?? raw?.project?.id ?? raw?.area?.projectId ?? ''),
+                            areaId: String(raw?.areaId ?? raw?.area?.id ?? ''),
                         })),
                 );
             }
@@ -245,10 +262,214 @@ export const useTrainings = () => {
         templates.value = aggregatedTemplates;
     };
 
+    const loadFormUsers = async (projectId: string, areaId: string) => {
+        if (!projectId || !areaId) {
+            formUsers.value = [];
+            return;
+        }
+
+        const aggregatedUsers: TrainingUserOption[] = [];
+        let currentPage = 1;
+        let totalPagesToFetch = 1;
+
+        while (currentPage <= totalPagesToFetch) {
+            const res = await userSvc.list({
+                projectId,
+                areaId,
+                page: currentPage,
+                limit: 100,
+                sortBy: 'createdAt',
+                order: 'desc',
+                status: 'ACTIVE',
+            });
+            const apiData: any = res?.data;
+            const meta: any = res?.meta ?? apiData?.meta ?? {};
+            const itemsRaw = Array.isArray(apiData) ? apiData : (apiData?.items ?? apiData?.list ?? apiData?.data ?? []);
+            const page = typeof meta?.page === 'number' ? meta.page : typeof apiData?.page === 'number' ? apiData.page : currentPage;
+            const limit = typeof meta?.limit === 'number' ? meta.limit : typeof apiData?.limit === 'number' ? apiData.limit : 100;
+            const total =
+                typeof meta?.total === 'number'
+                    ? meta.total
+                    : typeof meta?.totalItems === 'number'
+                      ? meta.totalItems
+                      : typeof apiData?.total === 'number'
+                        ? apiData.total
+                        : aggregatedUsers.length + (Array.isArray(itemsRaw) ? itemsRaw.length : 0);
+
+            if (Array.isArray(itemsRaw)) {
+                aggregatedUsers.push(
+                    ...itemsRaw
+                        .filter((raw: any) => raw?.id && raw?.name)
+                        .map((raw: any) => ({
+                            id: String(raw.id),
+                            name: String(raw.name),
+                            email: raw?.email ? String(raw.email) : null,
+                            projectId: raw?.projectId ? String(raw.projectId) : raw?.project?.id ? String(raw.project.id) : raw?.area?.projectId ? String(raw.area.projectId) : null,
+                            areaId: raw?.areaId ? String(raw.areaId) : raw?.area?.id ? String(raw.area.id) : null,
+                        })),
+                );
+            }
+
+            totalPagesToFetch = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+            currentPage = page + 1;
+        }
+
+        formUsers.value = aggregatedUsers;
+    };
+
+    const loadFormTemplates = async (projectId: string, areaId: string) => {
+        if (!projectId || !areaId) {
+            formTemplates.value = [];
+            return;
+        }
+
+        const aggregatedTemplates: TrainingTemplateOption[] = [];
+        let currentPage = 1;
+        let totalPagesToFetch = 1;
+
+        while (currentPage <= totalPagesToFetch) {
+            const res = await templateSvc.list({
+                projectId,
+                areaId,
+                page: currentPage,
+                limit: 100,
+                sortBy: 'createdAt',
+                order: 'desc',
+            });
+            const apiData: any = res?.data;
+            const meta: any = res?.meta ?? apiData?.meta ?? {};
+            const itemsRaw = Array.isArray(apiData) ? apiData : (apiData?.items ?? apiData?.list ?? apiData?.data ?? []);
+            const page = typeof meta?.page === 'number' ? meta.page : typeof apiData?.page === 'number' ? apiData.page : currentPage;
+            const limit = typeof meta?.limit === 'number' ? meta.limit : typeof apiData?.limit === 'number' ? apiData.limit : 100;
+            const total =
+                typeof meta?.total === 'number'
+                    ? meta.total
+                    : typeof meta?.totalItems === 'number'
+                      ? meta.totalItems
+                      : typeof apiData?.total === 'number'
+                        ? apiData.total
+                        : aggregatedTemplates.length + (Array.isArray(itemsRaw) ? itemsRaw.length : 0);
+
+            if (Array.isArray(itemsRaw)) {
+                aggregatedTemplates.push(
+                    ...itemsRaw
+                        .filter((raw: any) => raw?.id && raw?.name && raw?.status === 'ACTIVE')
+                        .map((raw: any) => ({
+                            id: String(raw.id),
+                            name: String(raw.name),
+                            version: typeof raw?.version === 'number' ? raw.version : Number(raw?.version ?? 0),
+                            projectId: String(raw?.projectId ?? raw?.project?.id ?? raw?.area?.projectId ?? ''),
+                            areaId: String(raw?.areaId ?? raw?.area?.id ?? ''),
+                        })),
+                );
+            }
+
+            totalPagesToFetch = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+            currentPage = page + 1;
+        }
+
+        formTemplates.value = aggregatedTemplates;
+    };
+
+    const loadProjects = async () => {
+        const aggregatedProjects: Project[] = [];
+        let currentPage = 1;
+        let totalPagesToFetch = 1;
+
+        while (currentPage <= totalPagesToFetch) {
+            const res = await projectSvc.list({ page: currentPage, limit: 100, sortBy: 'createdAt', order: 'desc' });
+            const apiData: any = res?.data;
+            const meta: any = res?.meta ?? apiData?.meta ?? {};
+            const itemsRaw = Array.isArray(apiData) ? apiData : (apiData?.items ?? apiData?.list ?? apiData?.data ?? []);
+            const page = typeof meta?.page === 'number' ? meta.page : typeof apiData?.page === 'number' ? apiData.page : currentPage;
+            const limit = typeof meta?.limit === 'number' ? meta.limit : typeof apiData?.limit === 'number' ? apiData.limit : 100;
+            const total =
+                typeof meta?.total === 'number'
+                    ? meta.total
+                    : typeof meta?.totalItems === 'number'
+                      ? meta.totalItems
+                      : typeof apiData?.total === 'number'
+                        ? apiData.total
+                        : aggregatedProjects.length + (Array.isArray(itemsRaw) ? itemsRaw.length : 0);
+
+            if (Array.isArray(itemsRaw)) {
+                aggregatedProjects.push(
+                    ...itemsRaw
+                        .filter((raw: any) => raw?.id && raw?.name && raw?.status === 'ACTIVE')
+                        .map((raw: any) => ({
+                            id: String(raw.id),
+                            name: String(raw.name),
+                            status: raw.status,
+                            createdAt: raw?.createdAt ? String(raw.createdAt) : undefined,
+                            updatedAt: raw?.updatedAt ? String(raw.updatedAt) : undefined,
+                            deletedAt: raw?.deletedAt ? String(raw.deletedAt) : null,
+                        })),
+                );
+            }
+
+            totalPagesToFetch = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+            currentPage = page + 1;
+        }
+
+        projects.value = aggregatedProjects;
+    };
+
+    const loadAreas = async (projectId: string) => {
+        if (!projectId) {
+            availableAreas.value = [];
+            return;
+        }
+
+        loadingAreas.value = true;
+        try {
+            const aggregatedAreas: AreaMinimal[] = [];
+            let currentPage = 1;
+            let totalPagesToFetch = 1;
+
+            while (currentPage <= totalPagesToFetch) {
+                const res = await areaSvc.list({ projectId, page: currentPage, limit: 100 });
+                const apiData: any = res?.data;
+                const meta: any = res?.meta ?? apiData?.meta ?? {};
+                const itemsRaw = Array.isArray(apiData) ? apiData : (apiData?.items ?? apiData?.list ?? apiData?.data ?? []);
+                const page = typeof meta?.page === 'number' ? meta.page : typeof apiData?.page === 'number' ? apiData.page : currentPage;
+                const limit = typeof meta?.limit === 'number' ? meta.limit : typeof apiData?.limit === 'number' ? apiData.limit : 100;
+                const total =
+                    typeof meta?.total === 'number'
+                        ? meta.total
+                        : typeof meta?.totalItems === 'number'
+                          ? meta.totalItems
+                          : typeof apiData?.total === 'number'
+                            ? apiData.total
+                            : aggregatedAreas.length + (Array.isArray(itemsRaw) ? itemsRaw.length : 0);
+
+                if (Array.isArray(itemsRaw)) {
+                    aggregatedAreas.push(
+                        ...itemsRaw
+                            .filter((raw: any) => raw?.id && raw?.name && raw?.status === 'ACTIVE')
+                            .map((raw: any) => ({
+                                id: String(raw.id),
+                                name: String(raw.name),
+                                status: raw.status,
+                            })),
+                    );
+                }
+
+                totalPagesToFetch = Math.max(1, Math.ceil(total / Math.max(limit, 1)));
+                currentPage = page + 1;
+            }
+
+            availableAreas.value = aggregatedAreas;
+        } catch {
+            availableAreas.value = [];
+        } finally {
+            loadingAreas.value = false;
+        }
+    };
+
     const loadOptions = async () => {
         loadingOptions.value = true;
         try {
-            await Promise.all([loadUsers(), loadTemplates()]);
+            await Promise.all([loadUsers(), loadTemplates(), loadProjects()]);
         } catch (e: any) {
             await errorAlert(e?.data?.message ?? 'Error al cargar opciones de training.');
         } finally {
@@ -285,6 +506,11 @@ export const useTrainings = () => {
         modalMode.value = 'create';
         editingId.value = null;
         formError.value = null;
+        selectedProjectId.value = '';
+        selectedAreaId.value = '';
+        availableAreas.value = [];
+        formUsers.value = [];
+        formTemplates.value = [];
         resetForm({
             values: {
                 userId: '',
@@ -317,6 +543,11 @@ export const useTrainings = () => {
         isModalOpen.value = false;
         editingId.value = null;
         formError.value = null;
+        selectedProjectId.value = '';
+        selectedAreaId.value = '';
+        availableAreas.value = [];
+        formUsers.value = [];
+        formTemplates.value = [];
         resetForm();
     };
 
@@ -383,6 +614,21 @@ export const useTrainings = () => {
         });
     });
 
+    watch(selectedProjectId, async (value) => {
+        selectedAreaId.value = '';
+        userId.value = '';
+        templateId.value = '';
+        formUsers.value = [];
+        formTemplates.value = [];
+        await loadAreas(value);
+    });
+
+    watch(selectedAreaId, async (value) => {
+        userId.value = '';
+        templateId.value = '';
+        await Promise.all([loadFormUsers(selectedProjectId.value, value), loadFormTemplates(selectedProjectId.value, value)]);
+    });
+
     onMounted(async () => {
         await Promise.all([loadOptions(), loadTrainings()]);
     });
@@ -396,6 +642,13 @@ export const useTrainings = () => {
         trainings,
         users,
         templates,
+        formUsers,
+        formTemplates,
+        projects,
+        availableAreas,
+        loadingAreas,
+        selectedProjectId,
+        selectedAreaId,
         pagination,
         filters,
         isModalOpen,

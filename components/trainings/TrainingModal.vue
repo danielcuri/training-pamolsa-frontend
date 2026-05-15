@@ -15,6 +15,8 @@
 
                             <div class="mt-5">
                                 <TrainingForm
+                                    v-model:selected-project-id="selectedProjectIdProxy"
+                                    v-model:selected-area-id="selectedAreaIdProxy"
                                     v-model:user-id="userIdProxy"
                                     v-model:template-id="templateIdProxy"
                                     v-model:start-date="startDateProxy"
@@ -28,6 +30,9 @@
                                     :errors="errors"
                                     :saving="saving"
                                     :form-error="formError"
+                                    :projects="projects"
+                                    :available-areas="availableAreas"
+                                    :loading-areas="loadingAreas"
                                     :users="users"
                                     :templates="templates"
                                     :status-options="statusOptions"
@@ -49,11 +54,15 @@ import { computed } from 'vue';
 import type { BaseFieldProps, GenericObject } from 'vee-validate';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import TrainingForm from './TrainingForm.vue';
+import type { AreaMinimal } from '~/types/operation';
+import type { Project } from '~/types/project';
 import type { TrainingResult, TrainingStatus, TrainingTemplateOption, TrainingUserOption } from '~/types/training';
 
 interface Props {
     isOpen: boolean;
     mode?: 'create' | 'edit';
+    selectedProjectId: string;
+    selectedAreaId: string;
     userId: string | undefined;
     userIdAttrs: BaseFieldProps & GenericObject;
     templateId: string | undefined;
@@ -67,6 +76,9 @@ interface Props {
     errors: Partial<Record<'userId' | 'templateId' | 'startDate' | 'status' | 'result', string | undefined>>;
     saving: boolean;
     formError: string | null;
+    projects: Project[];
+    availableAreas: AreaMinimal[];
+    loadingAreas: boolean;
     users: TrainingUserOption[];
     templates: TrainingTemplateOption[];
     statusOptions: Array<{ label: string; value: TrainingStatus }>;
@@ -76,6 +88,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
+    (e: 'update:selectedProjectId', value: string): void;
+    (e: 'update:selectedAreaId', value: string): void;
     (e: 'update:userId', value: string): void;
     (e: 'update:templateId', value: string): void;
     (e: 'update:startDate', value: string): void;
@@ -84,6 +98,16 @@ const emit = defineEmits<{
     (e: 'close'): void;
     (e: 'submit'): void;
 }>();
+
+const selectedProjectIdProxy = computed({
+    get: () => props.selectedProjectId,
+    set: (value: string) => emit('update:selectedProjectId', value),
+});
+
+const selectedAreaIdProxy = computed({
+    get: () => props.selectedAreaId,
+    set: (value: string) => emit('update:selectedAreaId', value),
+});
 
 const userIdProxy = computed({
     get: () => props.userId,
