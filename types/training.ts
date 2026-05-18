@@ -13,12 +13,16 @@ export interface TrainingUserOption {
     id: string;
     name: string;
     email?: string | null;
+    projectId?: string | null;
+    areaId?: string | null;
 }
 
 export interface TrainingTemplateOption {
     id: string;
     name: string;
     version?: number;
+    projectId?: string;
+    areaId?: string;
 }
 
 export interface TrainingListParams {
