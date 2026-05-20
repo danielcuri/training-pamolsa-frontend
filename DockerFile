@@ -1,67 +1,49 @@
-# -------------------------
-# Base image (builder)
-# -------------------------
-    FROM node:22-alpine AS base
+FROM node:22-alpine AS base
+WORKDIR /app
 
-    WORKDIR /app
-    
-    # Instalar dependencias necesarias para builds nativos (mejor compatibilidad)
-    RUN apk add --no-cache libc6-compat
-    
-    
-    # -------------------------
-    # Dependencies layer (cacheable)
-    # -------------------------
-    FROM base AS deps
-    
-    WORKDIR /app
-    
-    # Copiar solo manifests primero (máximo cache)
-    COPY package.json package-lock.json ./
-    
-    # Instalación determinística
-    RUN npm ci
-    
-    
-    # -------------------------
-    # Builder
-    # -------------------------
-    FROM base AS builder
-    
-    WORKDIR /app
-    
-    # Copiar node_modules cacheados
-    COPY --from=deps /app/node_modules ./node_modules
-    
-    # Copiar todo el proyecto
-    COPY . .
-    
-    # Build Nuxt
-    RUN npm run build
-    
-    
-    # -------------------------
-    # Production runner
-    # -------------------------
-    FROM node:22-alpine AS runner
-    
-    WORKDIR /app
-    
-    ENV NODE_ENV=production
-    ENV PORT=4100
-    
-    # Usuario no-root (seguridad)
-    RUN addgroup -S nuxt && adduser -S nuxt -G nuxt
-    
-    # Copiar solo output necesario (mínimo tamaño)
-    COPY --from=builder /app/.output ./.output
-    COPY --from=builder /app/package.json ./
-    
-    # Instalar SOLO producción (ligero)
-    RUN npm ci --omit=dev && npm cache clean --force
-    
-    USER nuxt
-    
-    EXPOSE 4100
-    
-    CMD ["node", ".output/server/index.mjs"]
+RUN apk add --no-cache libc6-compat
+
+
+# -------------------------
+# Install deps
+# -------------------------
+FROM base AS deps
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+
+# -------------------------
+# Build
+# -------------------------
+FROM base AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+RUN npm run build
+
+
+# -------------------------
+# Runner (FIX REAL)
+# -------------------------
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+# Puerto por defecto en un solo lugar; en build: docker build --build-arg APP_PORT=8080
+ARG APP_PORT=4100
+ENV NODE_ENV=production
+ENV PORT=${APP_PORT}
+
+RUN addgroup -S nuxt && adduser -S nuxt -G nuxt
+
+# SOLO output + node_modules ya listos del builder
+COPY --from=builder /app/.output ./.output
+
+USER nuxt
+
+EXPOSE ${APP_PORT}
+
+CMD ["node", ".output/server/index.mjs"]
