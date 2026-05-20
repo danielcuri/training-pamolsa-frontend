@@ -1,0 +1,67 @@
+# -------------------------
+# Base image (builder)
+# -------------------------
+    FROM node:22-alpine AS base
+
+    WORKDIR /app
+    
+    # Instalar dependencias necesarias para builds nativos (mejor compatibilidad)
+    RUN apk add --no-cache libc6-compat
+    
+    
+    # -------------------------
+    # Dependencies layer (cacheable)
+    # -------------------------
+    FROM base AS deps
+    
+    WORKDIR /app
+    
+    # Copiar solo manifests primero (máximo cache)
+    COPY package.json package-lock.json ./
+    
+    # Instalación determinística
+    RUN npm ci
+    
+    
+    # -------------------------
+    # Builder
+    # -------------------------
+    FROM base AS builder
+    
+    WORKDIR /app
+    
+    # Copiar node_modules cacheados
+    COPY --from=deps /app/node_modules ./node_modules
+    
+    # Copiar todo el proyecto
+    COPY . .
+    
+    # Build Nuxt
+    RUN npm run build
+    
+    
+    # -------------------------
+    # Production runner
+    # -------------------------
+    FROM node:22-alpine AS runner
+    
+    WORKDIR /app
+    
+    ENV NODE_ENV=production
+    ENV PORT=4100
+    
+    # Usuario no-root (seguridad)
+    RUN addgroup -S nuxt && adduser -S nuxt -G nuxt
+    
+    # Copiar solo output necesario (mínimo tamaño)
+    COPY --from=builder /app/.output ./.output
+    COPY --from=builder /app/package.json ./
+    
+    # Instalar SOLO producción (ligero)
+    RUN npm ci --omit=dev && npm cache clean --force
+    
+    USER nuxt
+    
+    EXPOSE 4100
+    
+    CMD ["node", ".output/server/index.mjs"]
