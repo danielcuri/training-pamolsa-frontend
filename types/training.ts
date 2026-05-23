@@ -173,6 +173,8 @@ export interface TrainingItem {
     id: string;
     userId: string;
     templateId: string;
+    projectId?: string | null;
+    areaId?: string | null;
     startDate: string;
     status: TrainingStatus;
     result: TrainingResult;

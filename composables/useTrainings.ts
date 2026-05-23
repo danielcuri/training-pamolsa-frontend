@@ -48,6 +48,7 @@ export const useTrainings = () => {
     const loadingAreas = ref(false);
     const selectedProjectId = ref('');
     const selectedAreaId = ref('');
+    const hydratingEditForm = ref(false);
 
     const filters = reactive({
         userId: '' as string | undefined,
@@ -104,6 +105,8 @@ export const useTrainings = () => {
         const id = raw?.id ?? raw?._id ?? raw?.uuid ?? raw?.trainingId;
         const normalizedUserId = raw?.userId ?? raw?.user?.id;
         const normalizedTemplateId = raw?.templateId ?? raw?.template?.id;
+        const normalizedProjectId = raw?.projectId ?? raw?.project?.id ?? raw?.area?.projectId ?? raw?.template?.projectId ?? raw?.template?.project?.id;
+        const normalizedAreaId = raw?.areaId ?? raw?.area?.id ?? raw?.template?.areaId ?? raw?.template?.area?.id ?? raw?.user?.areaId ?? raw?.user?.area?.id;
 
         if (!id || !normalizedUserId || !normalizedTemplateId || !raw?.startDate || !raw?.status || !raw?.result) {
             return null;
@@ -113,6 +116,8 @@ export const useTrainings = () => {
             id: String(id),
             userId: String(normalizedUserId),
             templateId: String(normalizedTemplateId),
+            projectId: normalizedProjectId ? String(normalizedProjectId) : null,
+            areaId: normalizedAreaId ? String(normalizedAreaId) : null,
             startDate: String(raw.startDate),
             status: raw.status as TrainingStatus,
             result: raw.result as TrainingResult,
@@ -523,19 +528,49 @@ export const useTrainings = () => {
         isModalOpen.value = true;
     };
 
-    const openEdit = (training: TrainingItem) => {
+    const openEdit = async (training: TrainingItem) => {
         modalMode.value = 'edit';
         editingId.value = training.id;
         formError.value = null;
-        resetForm();
-        setValues({
-            userId: training.userId,
-            templateId: training.templateId,
-            startDate: toDateInput(training.startDate),
-            status: training.status,
-            result: training.result,
-        });
-        isModalOpen.value = true;
+        hydratingEditForm.value = true;
+
+        try {
+            resetForm();
+
+            const matchedUser = users.value.find((user) => user.id === training.userId);
+            const matchedTemplate = templates.value.find((template) => template.id === training.templateId);
+            const resolvedProjectId = training.projectId ?? matchedTemplate?.projectId ?? matchedUser?.projectId ?? '';
+            const resolvedAreaId = training.areaId ?? matchedTemplate?.areaId ?? matchedUser?.areaId ?? '';
+
+            selectedProjectId.value = resolvedProjectId;
+
+            if (resolvedProjectId) {
+                await loadAreas(resolvedProjectId);
+            } else {
+                availableAreas.value = [];
+            }
+
+            selectedAreaId.value = resolvedAreaId;
+
+            if (resolvedProjectId && resolvedAreaId) {
+                await Promise.all([loadFormUsers(resolvedProjectId, resolvedAreaId), loadFormTemplates(resolvedProjectId, resolvedAreaId)]);
+            } else {
+                formUsers.value = [];
+                formTemplates.value = [];
+            }
+
+            setValues({
+                userId: training.userId,
+                templateId: training.templateId,
+                startDate: toDateInput(training.startDate),
+                status: training.status,
+                result: training.result,
+            });
+
+            isModalOpen.value = true;
+        } finally {
+            hydratingEditForm.value = false;
+        }
     };
 
     const closeModal = (force = false) => {
@@ -615,17 +650,21 @@ export const useTrainings = () => {
     });
 
     watch(selectedProjectId, async (value) => {
-        selectedAreaId.value = '';
-        userId.value = '';
-        templateId.value = '';
-        formUsers.value = [];
-        formTemplates.value = [];
+        if (!hydratingEditForm.value) {
+            selectedAreaId.value = '';
+            userId.value = '';
+            templateId.value = '';
+            formUsers.value = [];
+            formTemplates.value = [];
+        }
         await loadAreas(value);
     });
 
     watch(selectedAreaId, async (value) => {
-        userId.value = '';
-        templateId.value = '';
+        if (!hydratingEditForm.value) {
+            userId.value = '';
+            templateId.value = '';
+        }
         await Promise.all([loadFormUsers(selectedProjectId.value, value), loadFormTemplates(selectedProjectId.value, value)]);
     });
 
